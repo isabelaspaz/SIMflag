@@ -1,22 +1,68 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, Pressable } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Image, Pressable, Animated, Easing } from 'react-native';
 
 export default function ResultScreen({ navigation }) {
+    const rotateAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(rotateAnim, {
+                    toValue: 1,
+                    duration: 300,
+                    easing: Easing.inOut(Easing.ease),
+                    useNativeDriver: true,
+                }),
+                Animated.timing(rotateAnim, {
+                    toValue: 0,
+                    duration: 300,
+                    easing: Easing.inOut(Easing.ease),
+                    useNativeDriver: true,
+                }),
+            ])
+        ).start();
+    }, []);
+
+    const tilt = rotateAnim.interpolate({
+        inputRange: [-1, 1],
+        outputRange: ['-1.5deg', '1.5deg'],
+    });
+
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Bandeira encontrada</Text>
+            <View style={styles.blurShapeLeft} />
+            <View style={styles.blurShapeRight} />
 
-            <Image
-                source={{ uri: 'https://flagcdn.com/w320/br.png' }}
-                style={styles.flag}
-            />
+            <View style={styles.card}>
+                <Text style={styles.title}>Bandeira identificada!</Text>
 
-            <Text style={styles.countryName}>Brasil</Text>
-            <Text style={styles.countryCode}>Código: BR</Text>
+                <Animated.View
+                    style={[
+                        styles.flagFrame,
+                        {
+                            transform: [{ rotate: tilt }],
+                        },
+                    ]}
+                >
+                    <Image
+                        source={{ uri: 'https://flagcdn.com/w320/br.png' }}
+                        style={styles.flag}
+                    />
+                </Animated.View>
 
-            <Pressable style={styles.button} onPress={() => navigation.goBack()}>
-                <Text style={styles.buttonText}>Voltar</Text>
-            </Pressable>
+                <Text style={styles.countryName}>Brasil</Text>
+
+                <Pressable style={styles.primaryButton}>
+                    <Text style={styles.primaryButtonText}>Compartilhar</Text>
+                </Pressable>
+
+                <Pressable
+                    style={styles.secondaryButton}
+                    onPress={() => navigation.goBack()}
+                >
+                    <Text style={styles.secondaryButtonText}>Voltar</Text>
+                </Pressable>
+            </View>
         </View>
     );
 }
@@ -24,43 +70,104 @@ export default function ResultScreen({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#ffffff',
+        backgroundColor: '#DFF4F8',
         alignItems: 'center',
         justifyContent: 'center',
         padding: 24,
     },
+    blurShapeLeft: {
+        position: 'absolute',
+        top: 110,
+        left: -45,
+        width: 170,
+        height: 170,
+        borderRadius: 85,
+        backgroundColor: '#C7ECF4',
+        opacity: 0.8,
+    },
+    blurShapeRight: {
+        position: 'absolute',
+        bottom: 80,
+        right: -35,
+        width: 210,
+        height: 210,
+        borderRadius: 105,
+        backgroundColor: '#B9E57F',
+        opacity: 0.4,
+    },
+    card: {
+        width: '100%',
+        maxWidth: 390,
+        backgroundColor: '#FFFDF7',
+        borderRadius: 32,
+        paddingHorizontal: 28,
+        paddingVertical: 34,
+        alignItems: 'center',
+        shadowColor: '#7CB9C7',
+        shadowOpacity: 0.16,
+        shadowRadius: 18,
+        shadowOffset: { width: 0, height: 10 },
+        elevation: 6,
+    },
+
     title: {
         fontSize: 28,
-        fontWeight: '700',
-        color: '#1d3557',
-        marginBottom: 24,
+        lineHeight: 34,
+        fontWeight: '800',
+        color: '#356B7A',
+        textAlign: 'center',
+        marginBottom: 30,
+    },
+
+    flagFrame: {
+        width: '100%',
+        backgroundColor: '#F5FCFD',
+        borderRadius: 24,
+        padding: 14,
+        borderWidth: 2,
+        borderColor: '#C9ECF3',
+        marginBottom: 22,
     },
     flag: {
-        width: 240,
-        height: 160,
-        borderRadius: 14,
-        marginBottom: 20,
+        width: '100%',
+        height: 180,
+        borderRadius: 18,
     },
     countryName: {
-        fontSize: 24,
-        fontWeight: '700',
-        color: '#1f2937',
-        marginBottom: 8,
+        fontSize: 26,
+        fontWeight: '800',
+        color: '#356B7A',
+        marginBottom: 25,
     },
-    countryCode: {
-        fontSize: 15,
-        color: '#6b7280',
-        marginBottom: 24,
+    primaryButton: {
+        width: '100%',
+        backgroundColor: '#3BB6E6',
+        paddingVertical: 16,
+        borderRadius: 18,
+        alignItems: 'center',
+        marginBottom: 12,
+        shadowColor: '#34A9D6',
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
+        shadowOffset: { width: 0, height: 5 },
+        elevation: 4,
     },
-    button: {
-        backgroundColor: '#2563eb',
-        paddingVertical: 14,
-        paddingHorizontal: 24,
-        borderRadius: 14,
-    },
-    buttonText: {
-        color: '#fff',
+    primaryButtonText: {
+        color: '#FFFFFF',
         fontSize: 16,
+        fontWeight: '800',
+        letterSpacing: 0.2,
+    },
+    secondaryButton: {
+        width: '100%',
+        backgroundColor: '#EAF8DC',
+        paddingVertical: 15,
+        borderRadius: 18,
+        alignItems: 'center',
+    },
+    secondaryButtonText: {
+        color: '#5D7A2A',
+        fontSize: 15,
         fontWeight: '700',
     },
 });
