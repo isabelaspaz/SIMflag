@@ -2,7 +2,9 @@ import React from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 
 export default function ShareTemplate({ country }) {
-    const flagUrl = `https://flagcdn.com/w320/${country.isoCode.toLowerCase()}.png`;
+    const flagUrl = country?.isoCode
+        ? `https://flagcdn.com/w320/${country.isoCode.toLowerCase()}.png`
+        : null;
 
     return (
         <View style={styles.wrapper}>
@@ -10,19 +12,28 @@ export default function ShareTemplate({ country }) {
             <View style={styles.blurShapeRight} />
 
             <View style={styles.card}>
-                <Text style={styles.title}>Bandeira identificada!</Text>
+                <Text style={styles.title}>
+                    {country?.success
+                        ? "Bandeira identificada!"
+                        : "Nenhum país identificado"}
+                </Text>
 
                 <View style={styles.flagFrame}>
-                    <Image
-                        source={{ uri: flagUrl }}
-                        style={styles.flag}
-                        resizeMode="cover"
-                    />
+                    {flagUrl ? (
+                        <Image
+                            source={{ uri: flagUrl }}
+                            style={styles.flag}
+                            resizeMode="cover"
+                        />
+                    ) : (
+                        <View style={styles.emptyFlagContainer}>
+                            <Text style={styles.emptyFlagIcon}>{country?.flag || "🚫"}</Text>
+                            <Text style={styles.emptyFlagText}>Sem chip identificado</Text>
+                        </View>
+                    )}
                 </View>
 
-                <Text style={styles.countryName}>{country.countryName}</Text>
-                <Text style={styles.countryCode}>Código: {country.isoCode}</Text>
-                <Text style={styles.message}>{country.message}</Text>
+
 
                 <View style={styles.badge}>
                     <Text style={styles.badgeText}>Compartilhado via SIMflag</Text>
@@ -95,6 +106,23 @@ const styles = StyleSheet.create({
         height: 180,
         borderRadius: 18,
     },
+    emptyFlagContainer: {
+        width: "100%",
+        height: 180,
+        borderRadius: 18,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#EDF7F9",
+    },
+    emptyFlagIcon: {
+        fontSize: 56,
+        marginBottom: 10,
+    },
+    emptyFlagText: {
+        fontSize: 16,
+        fontWeight: "700",
+        color: "#6B7E85",
+    },
     countryName: {
         fontSize: 26,
         fontWeight: "800",
@@ -119,10 +147,12 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 16,
         borderRadius: 999,
+
     },
     badgeText: {
         color: "#5D7A2A",
         fontSize: 13,
         fontWeight: "700",
+
     },
 });
