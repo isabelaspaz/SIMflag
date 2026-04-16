@@ -23,7 +23,7 @@ export default function ResultScreen({ navigation, route }) {
     isoCode: null,
     countryName: null,
     flag: "🚫",
-    message: "País não identificado.",
+
   };
 
   useEffect(() => {
@@ -129,11 +129,7 @@ export default function ResultScreen({ navigation, route }) {
         </Animated.View>
 
         <Text style={styles.countryName}>
-          {country.countryName || "Não identificado"}
-        </Text>
-
-        <Text style={styles.countryCode}>
-          Código: {country.isoCode || "--"}
+          {country.countryName || ""}
         </Text>
 
         <Text style={styles.message}>{country.message}</Text>
