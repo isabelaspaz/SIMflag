@@ -7,7 +7,10 @@ import {
   Pressable,
   Animated,
   Easing,
+  Alert,
 } from "react-native";
+import * as Sharing from "expo-sharing";
+import * as FileSystem from "expo-file-system/legacy";
 
 export default function ResultScreen({ navigation, route }) {
   const rotateAnim = useRef(new Animated.Value(0)).current;
@@ -46,6 +49,41 @@ export default function ResultScreen({ navigation, route }) {
 
   const flagUrl = `https://flagcdn.com/w320/${country.isoCode.toLowerCase()}.png`;
 
+  async function handleShare() {
+    try {
+      const isAvailable = await Sharing.isAvailableAsync();
+
+      if (!isAvailable) {
+        Alert.alert(
+          "Compartilhamento indisponível",
+          "O compartilhamento não está disponível neste dispositivo.",
+        );
+        return;
+      }
+
+      const content =
+        `Resultado do SIMflag\n\n` +
+        `País: ${country.countryName}\n` +
+        `Código ISO: ${country.isoCode}\n` +
+        `Status: ${country.message}\n`;
+
+      const fileUri = FileSystem.cacheDirectory + "simflag-resultado.txt";
+
+      await FileSystem.writeAsStringAsync(fileUri, content);
+
+      await Sharing.shareAsync(fileUri, {
+        dialogTitle: "Compartilhar resultado do país",
+        mimeType: "text/plain",
+      });
+    } catch (error) {
+      console.log("Erro no compartilhamento:", error);
+      Alert.alert(
+        "Erro ao compartilhar",
+        "Não foi possível compartilhar o resultado.",
+      );
+    }
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.blurShapeLeft} />
@@ -70,12 +108,10 @@ export default function ResultScreen({ navigation, route }) {
         </Animated.View>
 
         <Text style={styles.countryName}>{country.countryName}</Text>
-
         <Text style={styles.countryCode}>Código: {country.isoCode}</Text>
-
         <Text style={styles.message}>{country.message}</Text>
 
-        <Pressable style={styles.primaryButton}>
+        <Pressable style={styles.primaryButton} onPress={handleShare}>
           <Text style={styles.primaryButtonText}>Compartilhar</Text>
         </Pressable>
 
