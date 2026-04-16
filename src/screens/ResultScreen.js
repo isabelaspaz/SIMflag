@@ -11,9 +11,12 @@ import {
 } from "react-native";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system/legacy";
+import ViewShot from "react-native-view-shot";
+import ShareTemplate from "../components/ShareTemplate";
 
 export default function ResultScreen({ navigation, route }) {
   const rotateAnim = useRef(new Animated.Value(0)).current;
+  const templateRef = useRef(null);
 
   const country = route?.params?.country || {
     success: false,
@@ -61,27 +64,30 @@ export default function ResultScreen({ navigation, route }) {
         return;
       }
 
-      const content =
-        `Resultado do SIMflag\n\n` +
-        `País: ${country.countryName}\n` +
-        `Código ISO: ${country.isoCode}\n` +
-        `Status: ${country.message}\n`;
+      const uri = await templateRef.current.capture();
 
-      const fileUri = FileSystem.cacheDirectory + "simflag-resultado.txt";
+      const finalUri = FileSystem.cacheDirectory + "simflag-template.png";
 
-      await FileSystem.writeAsStringAsync(fileUri, content);
+      await FileSystem.copyAsync({
+        from: uri,
+        to: finalUri,
+      });
 
-      await Sharing.shareAsync(fileUri, {
+      await Sharing.shareAsync(finalUri, {
         dialogTitle: "Compartilhar resultado do país",
-        mimeType: "text/plain",
+        mimeType: "image/png",
       });
     } catch (error) {
       console.log("Erro no compartilhamento:", error);
       Alert.alert(
         "Erro ao compartilhar",
-        "Não foi possível compartilhar o resultado.",
+        "Não foi possível compartilhar o template.",
       );
     }
+  }
+
+  function handleOpenPreview() {
+    navigation.navigate("SharePreview", { country });
   }
 
   return (
@@ -115,12 +121,25 @@ export default function ResultScreen({ navigation, route }) {
           <Text style={styles.primaryButtonText}>Compartilhar</Text>
         </Pressable>
 
+        <Pressable style={styles.previewButton} onPress={handleOpenPreview}>
+          <Text style={styles.previewButtonText}>Ver template</Text>
+        </Pressable>
+
         <Pressable
           style={styles.secondaryButton}
           onPress={() => navigation.goBack()}
         >
           <Text style={styles.secondaryButtonText}>Voltar</Text>
         </Pressable>
+      </View>
+
+      <View style={styles.hiddenTemplate}>
+        <ViewShot
+          ref={templateRef}
+          options={{ format: "png", quality: 1, result: "tmpfile" }}
+        >
+          <ShareTemplate country={country} />
+        </ViewShot>
       </View>
     </View>
   );
@@ -227,6 +246,21 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     letterSpacing: 0.2,
   },
+  previewButton: {
+    width: "100%",
+    backgroundColor: "#DFF4F8",
+    paddingVertical: 15,
+    borderRadius: 18,
+    alignItems: "center",
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: "#C9ECF3",
+  },
+  previewButtonText: {
+    color: "#356B7A",
+    fontSize: 15,
+    fontWeight: "700",
+  },
   secondaryButton: {
     width: "100%",
     backgroundColor: "#EAF8DC",
@@ -238,5 +272,10 @@ const styles = StyleSheet.create({
     color: "#5D7A2A",
     fontSize: 15,
     fontWeight: "700",
+  },
+  hiddenTemplate: {
+    position: "absolute",
+    left: -9999,
+    top: 0,
   },
 });
