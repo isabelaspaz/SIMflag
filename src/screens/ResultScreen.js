@@ -23,7 +23,6 @@ export default function ResultScreen({ navigation, route }) {
     isoCode: null,
     countryName: null,
     flag: "🚫",
-
   };
 
   useEffect(() => {
@@ -90,10 +89,6 @@ export default function ResultScreen({ navigation, route }) {
     }
   }
 
-  function handleOpenPreview() {
-    navigation.navigate("SharePreview", { country });
-  }
-
   return (
     <View style={styles.container}>
       <View style={styles.blurShapeLeft} />
@@ -149,24 +144,6 @@ export default function ResultScreen({ navigation, route }) {
             ]}
           >
             {country.success ? "Compartilhar" : "Compartilhamento indisponível"}
-          </Text>
-        </Pressable>
-
-        <Pressable
-          style={[
-            styles.previewButton,
-            !country.success && styles.previewButtonDisabled,
-          ]}
-          onPress={handleOpenPreview}
-          disabled={!country.success}
-        >
-          <Text
-            style={[
-              styles.previewButtonText,
-              !country.success && styles.previewButtonTextDisabled,
-            ]}
-          >
-            {country.success ? "Ver template" : "Template indisponível"}
           </Text>
         </Pressable>
 
@@ -317,28 +294,6 @@ const styles = StyleSheet.create({
   },
   primaryButtonTextDisabled: {
     color: "#EAF4F7",
-  },
-  previewButton: {
-    width: "100%",
-    backgroundColor: "#DFF4F8",
-    paddingVertical: 15,
-    borderRadius: 18,
-    alignItems: "center",
-    marginBottom: 12,
-    borderWidth: 2,
-    borderColor: "#C9ECF3",
-  },
-  previewButtonDisabled: {
-    backgroundColor: "#E7EEF0",
-    borderColor: "#D1DADF",
-  },
-  previewButtonText: {
-    color: "#356B7A",
-    fontSize: 15,
-    fontWeight: "700",
-  },
-  previewButtonTextDisabled: {
-    color: "#8AA0A8",
   },
   secondaryButton: {
     width: "100%",
