@@ -33,7 +33,9 @@ export default function ShareTemplate({ country }) {
                     )}
                 </View>
 
-
+                <Text style={styles.countryName}>
+                    {country?.countryName || ""}
+                </Text>
 
                 <View style={styles.badge}>
                     <Text style={styles.badgeText}>Compartilhado via SIMflag</Text>
@@ -147,12 +149,10 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 16,
         borderRadius: 999,
-
     },
     badgeText: {
         color: "#5D7A2A",
         fontSize: 13,
         fontWeight: "700",
-
     },
 });
