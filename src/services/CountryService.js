@@ -39,13 +39,12 @@ export async function getCountryFromCellular() {
   try {
     const isoCode = await Cellular.getIsoCountryCodeAsync();
 
-    if (!isoCode) {
+    if (!isoCode || isoCode === "--") {
       return {
         success: false,
-        isoCode: "BR",
-        countryName: "Brasil",
-        flag: "🇧🇷",
-        message: "País não identificado pela rede celular. Fallback aplicado.",
+        isoCode: null,
+        countryName: null,
+        flag: "🚫",
       };
     }
 
@@ -56,15 +55,13 @@ export async function getCountryFromCellular() {
       isoCode: upperIso,
       countryName: COUNTRY_NAMES[upperIso] || upperIso,
       flag: isoToFlagEmoji(upperIso),
-      message: "País identificado com sucesso.",
     };
   } catch (error) {
     return {
       success: false,
-      isoCode: "BR",
-      countryName: "Brasil",
-      flag: "🇧🇷",
-      message: "Erro ao obter país da conexão. Fallback aplicado.",
+      isoCode: null,
+      countryName: null,
+      flag: "❌",
       error: error.message,
     };
   }

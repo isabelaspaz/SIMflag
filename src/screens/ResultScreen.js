@@ -20,9 +20,9 @@ export default function ResultScreen({ navigation, route }) {
 
   const country = route?.params?.country || {
     success: false,
-    isoCode: "BR",
-    countryName: "Brasil",
-    flag: "🇧🇷",
+    isoCode: null,
+    countryName: null,
+    flag: "🚫",
     message: "País não identificado.",
   };
 
@@ -50,9 +50,13 @@ export default function ResultScreen({ navigation, route }) {
     outputRange: ["-1.5deg", "1.5deg"],
   });
 
-  const flagUrl = `https://flagcdn.com/w320/${country.isoCode.toLowerCase()}.png`;
+  const flagUrl = country.isoCode
+    ? `https://flagcdn.com/w320/${country.isoCode.toLowerCase()}.png`
+    : null;
 
   async function handleShare() {
+    if (!country.success) return;
+
     try {
       const isAvailable = await Sharing.isAvailableAsync();
 
@@ -96,7 +100,11 @@ export default function ResultScreen({ navigation, route }) {
       <View style={styles.blurShapeRight} />
 
       <View style={styles.card}>
-        <Text style={styles.title}>Bandeira identificada!</Text>
+        <Text style={styles.title}>
+          {country.success
+            ? "Bandeira identificada!"
+            : "Nenhum país identificado"}
+        </Text>
 
         <Animated.View
           style={[
@@ -106,23 +114,64 @@ export default function ResultScreen({ navigation, route }) {
             },
           ]}
         >
-          <Image
-            source={{ uri: flagUrl }}
-            style={styles.flag}
-            resizeMode="cover"
-          />
+          {flagUrl ? (
+            <Image
+              source={{ uri: flagUrl }}
+              style={styles.flag}
+              resizeMode="cover"
+            />
+          ) : (
+            <View style={styles.emptyFlagContainer}>
+              <Text style={styles.emptyFlagIcon}>{country.flag || "🚫"}</Text>
+              <Text style={styles.emptyFlagText}>Sem chip identificado</Text>
+            </View>
+          )}
         </Animated.View>
 
-        <Text style={styles.countryName}>{country.countryName}</Text>
-        <Text style={styles.countryCode}>Código: {country.isoCode}</Text>
+        <Text style={styles.countryName}>
+          {country.countryName || "Não identificado"}
+        </Text>
+
+        <Text style={styles.countryCode}>
+          Código: {country.isoCode || "--"}
+        </Text>
+
         <Text style={styles.message}>{country.message}</Text>
 
-        <Pressable style={styles.primaryButton} onPress={handleShare}>
-          <Text style={styles.primaryButtonText}>Compartilhar</Text>
+        <Pressable
+          style={[
+            styles.primaryButton,
+            !country.success && styles.primaryButtonDisabled,
+          ]}
+          onPress={handleShare}
+          disabled={!country.success}
+        >
+          <Text
+            style={[
+              styles.primaryButtonText,
+              !country.success && styles.primaryButtonTextDisabled,
+            ]}
+          >
+            {country.success ? "Compartilhar" : "Compartilhamento indisponível"}
+          </Text>
         </Pressable>
 
-        <Pressable style={styles.previewButton} onPress={handleOpenPreview}>
-          <Text style={styles.previewButtonText}>Ver template</Text>
+        <Pressable
+          style={[
+            styles.previewButton,
+            !country.success && styles.previewButtonDisabled,
+          ]}
+          onPress={handleOpenPreview}
+          disabled={!country.success}
+        >
+          <Text
+            style={[
+              styles.previewButtonText,
+              !country.success && styles.previewButtonTextDisabled,
+            ]}
+          >
+            {country.success ? "Ver template" : "Template indisponível"}
+          </Text>
         </Pressable>
 
         <Pressable
@@ -133,14 +182,16 @@ export default function ResultScreen({ navigation, route }) {
         </Pressable>
       </View>
 
-      <View style={styles.hiddenTemplate}>
-        <ViewShot
-          ref={templateRef}
-          options={{ format: "png", quality: 1, result: "tmpfile" }}
-        >
-          <ShareTemplate country={country} />
-        </ViewShot>
-      </View>
+      {country.success && (
+        <View style={styles.hiddenTemplate}>
+          <ViewShot
+            ref={templateRef}
+            options={{ format: "png", quality: 1, result: "tmpfile" }}
+          >
+            <ShareTemplate country={country} />
+          </ViewShot>
+        </View>
+      )}
     </View>
   );
 }
@@ -209,6 +260,23 @@ const styles = StyleSheet.create({
     height: 180,
     borderRadius: 18,
   },
+  emptyFlagContainer: {
+    width: "100%",
+    height: 180,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#EDF7F9",
+  },
+  emptyFlagIcon: {
+    fontSize: 56,
+    marginBottom: 10,
+  },
+  emptyFlagText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#6B7E85",
+  },
   countryName: {
     fontSize: 26,
     fontWeight: "800",
@@ -240,11 +308,19 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 5 },
     elevation: 4,
   },
+  primaryButtonDisabled: {
+    backgroundColor: "#AFC7CF",
+    shadowOpacity: 0,
+    elevation: 0,
+  },
   primaryButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "800",
     letterSpacing: 0.2,
+  },
+  primaryButtonTextDisabled: {
+    color: "#EAF4F7",
   },
   previewButton: {
     width: "100%",
@@ -256,10 +332,17 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#C9ECF3",
   },
+  previewButtonDisabled: {
+    backgroundColor: "#E7EEF0",
+    borderColor: "#D1DADF",
+  },
   previewButtonText: {
     color: "#356B7A",
     fontSize: 15,
     fontWeight: "700",
+  },
+  previewButtonTextDisabled: {
+    color: "#8AA0A8",
   },
   secondaryButton: {
     width: "100%",

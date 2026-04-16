@@ -22,9 +22,9 @@ export default function HomeScreen({ navigation }) {
       navigation.navigate("Result", {
         country: {
           success: false,
-          isoCode: "BR",
-          countryName: "Brasil",
-          flag: "🇧🇷",
+          isoCode: null,
+          countryName: null,
+          flag: "🚫",
           message: "Erro ao identificar o país.",
         },
       });
